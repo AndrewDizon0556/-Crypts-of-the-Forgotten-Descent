@@ -1,0 +1,38 @@
+{
+  "floor": 3,
+  "dungeon_seed": 1781388491,
+  "player": {
+    "name": "Rogue",
+    "class": "rogue",
+    "hp": 20,
+    "max_hp": 35,
+    "atk": 13,
+    "defense": 3,
+    "level": 2,
+    "xp": 60,
+    "gold": 24,
+    "passive": "backstab",
+    "shard_echo": false,
+    "backstab_ready": true,
+    "equipped_weapon": "rusty_sword",
+    "equipped_armor": null,
+    "inventory": [
+      "bomb",
+      "bomb",
+      "health_potion",
+      "health_potion",
+      "health_potion",
+      "mega_potion",
+      "antidote",
+      "mega_potion"
+    ]
+  },
+  "stats": {
+    "floors_reached": 3,
+    "enemies_killed": 9,
+    "gold_collected": 24,
+    "shards_found": 0,
+    "turns_survived": 336,
+    "character_class": "rogue"
+  }
+}

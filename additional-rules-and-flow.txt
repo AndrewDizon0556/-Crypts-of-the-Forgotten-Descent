@@ -1,0 +1,296 @@
+╔══════════════════════════════════════════════════════════════════╗
+║        CRYPTS OF THE FORGOTTEN DESCENT                          ║
+║         — ADDITIONAL RULES & GAME FLOW —                       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════
+SECTION 1: DUNGEON GENERATION FLOW
+════════════════════════════════════════════════════════════════════
+
+Each floor is generated fresh using BSP (Binary Space Partitioning):
+
+  STEP 1 — PARTITION
+    The 60x40 map is recursively split into rectangular regions
+    until each region is between 8x8 and 20x12 tiles.
+
+  STEP 2 — ROOM PLACEMENT
+    One room is placed inside each region with 1-tile padding.
+    Room sizes: random width 5-15, random height 4-10.
+
+  STEP 3 — CORRIDOR CONNECTION
+    Rooms are connected via L-shaped corridors (horizontal then
+    vertical, or vertical then horizontal — chosen randomly).
+    This guarantees the entire dungeon is always fully connected.
+
+  STEP 4 — TILE ASSIGNMENT
+    All non-room, non-corridor tiles → Wall (#)
+    Room and corridor tiles → Floor (.)
+
+  STEP 5 — FEATURE PLACEMENT (in order)
+    a) Player spawn  → placed in the first generated room
+    b) Staircase     → placed in the room farthest from spawn
+    c) Enemies       → distributed across remaining rooms
+       (enemy count = floor_number * 2 + random(2, 5))
+    d) Items         → scattered randomly on floor tiles
+       (item count = random(3, floor_number + 4))
+    e) Shrines       → 1 shrine per floor (floors 2, 4, 6, 8 only)
+    f) Locked Rooms  → 0-1 per floor (contain rare loot + key req)
+    g) Shards        → placed on floors 4, 5, 6, 7, 8, 9, 10
+
+  STEP 6 — VALIDATION
+    Confirm all rooms are reachable from spawn via flood fill.
+    If validation fails, regenerate (max 3 retries, then fallback).
+
+════════════════════════════════════════════════════════════════════
+SECTION 2: ENEMY AI FLOW
+════════════════════════════════════════════════════════════════════
+
+Enemies use a simple 3-state FSM (Finite State Machine):
+
+  STATE: IDLE
+    → Enemy stands still. Activated before being seen by player.
+    → Transition to CHASE if player enters enemy's detection range.
+
+  STATE: CHASE
+    → Enemy pursues player using BFS (Breadth-First Search).
+    → Recalculates path every turn.
+    → Transition to ATTACK if player is adjacent (1 tile away).
+    → Transition back to IDLE if player leaves detection range (10 tiles).
+
+  STATE: ATTACK
+    → Enemy deals damage to player using combat formula.
+    → If enemy has a special ability, it triggers here (see below).
+    → Transition back to CHASE if player moves away.
+
+  DETECTION RANGE BY ENEMY TYPE:
+    Skeleton    : 5 tiles
+    Ghoul       : 6 tiles
+    Wraith      : 8 tiles (passes through walls)
+    Stone Golem : 4 tiles (slow, but hits very hard)
+    Lich        : 7 tiles (can curse from 3 tiles away)
+
+  SPECIAL ABILITIES (triggered every 3rd attack):
+    Ghoul       → Inflict BLEED for 8 turns
+    Wraith      → Phase attack ignores player DEF entirely
+    Stone Golem → Stun player (skip 1 turn), deal double damage
+    Lich        → Apply CURSED status (halve ATK and DEF for 4 turns)
+
+════════════════════════════════════════════════════════════════════
+SECTION 3: BOSS — THE HOLLOW WARDEN
+════════════════════════════════════════════════════════════════════
+
+  Appears exclusively on Floor 10.
+  Spawns in a specially generated large central chamber (20x15 tiles).
+  The staircase is LOCKED until the boss is defeated.
+
+  STATS:
+    HP   : 150
+    ATK  : 18
+    DEF  : 8
+    XP   : 500
+    GOLD : 100
+
+  PHASES:
+    Phase 1 (HP 150-100):
+      → Standard chase and melee attack behavior.
+      → Summons 2 Skeletons every 5 turns.
+
+    Phase 2 (HP 99-50):
+      → Movement speed doubles (moves 2 tiles per turn).
+      → Applies BLEED on every successful hit.
+      → Summons 1 Ghoul every 4 turns.
+
+    Phase 3 (HP 49-1):
+      → Rage mode: ATK increases to 25.
+      → Every 3rd attack: AoE slam — all tiles adjacent to boss
+        take 15 damage (player must dodge).
+      → Summons 1 Wraith every 5 turns.
+      → DEF drops to 3 (weak point — go for the kill).
+
+  DEATH:
+    → Boss explodes in a burst of light (visual effect).
+    → All remaining summoned enemies die instantly.
+    → Drops the final Shard of Ethos (#7) if not already collected.
+    → Drops Obsidian Plate (best armor) and 100 GOLD guaranteed.
+    → Ascension Portal opens at the center of the room.
+
+════════════════════════════════════════════════════════════════════
+SECTION 4: SHRINE SYSTEM
+════════════════════════════════════════════════════════════════════
+
+  Shrines appear on floors 2, 4, 6, and 8.
+  Player interacts by walking onto the shrine tile [Ω].
+  Each shrine offers ONE of three randomly chosen boons (player picks):
+
+  BOON OPTIONS (randomized per floor):
+    Heal         → Fully restore HP
+    Upgrade ATK  → Permanent +3 ATK
+    Upgrade DEF  → Permanent +2 DEF
+    Curse Lift   → Remove all active negative status effects
+    Gold Bless   → Gain 25 GOLD
+    XP Surge     → Gain 75 XP instantly
+    Extra Life*  → Gain 1 Shard Echo (survive one death, floor 6+ only)
+
+  * Shard Echo: If player dies while holding a Shard Echo, they are
+    revived at the current floor entrance with 1 HP. One-time use.
+
+════════════════════════════════════════════════════════════════════
+SECTION 5: INVENTORY FLOW
+════════════════════════════════════════════════════════════════════
+
+  Max inventory size: 8 slots.
+  Equipment slots: 1 Weapon, 1 Armor (auto-equip on pickup).
+
+  PICKUP FLOW:
+    1. Player walks onto item tile.
+    2. If item is equipment → auto-equip (old item goes to inventory).
+    3. If item is consumable → added to inventory if space available.
+    4. If inventory full → prompt: "Drop which item to make space?"
+    5. Player selects item to drop → dropped item appears on current tile.
+
+  USE FLOW (from inventory screen):
+    1. Press I to open inventory.
+    2. Highlight item with arrow keys.
+    3. Press E to use/equip.
+    4. Consumables → effect applied immediately, item removed.
+    5. Equipment   → equipped, previous equipment returns to inventory.
+    6. Press I or ESC to close inventory (no turn consumed).
+
+════════════════════════════════════════════════════════════════════
+SECTION 6: COMPLETE GAME LOOP FLOW
+════════════════════════════════════════════════════════════════════
+
+  ┌─────────────────────────────────┐
+  │         MAIN MENU               │
+  │  [New Game] [Continue] [Quit]   │
+  └────────────┬────────────────────┘
+               │ New Game
+               ▼
+  ┌─────────────────────────────────┐
+  │    CHARACTER CREATION           │
+  │  Choose class:                  │
+  │  [Warrior] [Rogue] [Mage]       │
+  └────────────┬────────────────────┘
+               │
+               ▼
+  ┌─────────────────────────────────┐
+  │    FLOOR GENERATION             │
+  │  Seed generated, map built,     │
+  │  enemies + items placed         │
+  └────────────┬────────────────────┘
+               │
+               ▼
+  ┌─────────────────────────────────┐
+  │         GAME LOOP               │◄──────────────────────┐
+  │  1. Render screen               │                       │
+  │  2. Wait for player input       │                       │
+  │  3. Process player action       │                       │
+  │  4. Update FOV                  │                       │
+  │  5. Process enemy turns         │                       │
+  │  6. Check win/lose conditions   │                       │
+  └────────────┬────────────────────┘                       │
+               │                                            │
+       ┌───────┴────────┐                                   │
+       ▼                ▼                                   │
+  [Player Dies]   [Reach Staircase]                         │
+       │                │                                   │
+       ▼                ▼                                   │
+  ┌──────────┐   ┌─────────────────┐                        │
+  │ DEATH    │   │ NEXT FLOOR      │                        │
+  │ SCREEN   │   │ Generate new    │────────────────────────┘
+  │ Save     │   │ floor, scale    │
+  │ deleted  │   │ enemies up      │
+  └──────────┘   └─────────────────┘
+       │                │
+       │         [Floor 10 — Boss]
+       │                │
+       │         [Defeat Warden]
+       │                │
+       │                ▼
+       │         ┌─────────────────┐
+       │         │  VICTORY SCREEN │
+       │         │  Show: floors,  │
+       │         │  kills, shards, │
+       │         │  time, gold     │
+       │         └─────────────────┘
+       │                │
+       └───────┬────────┘
+               ▼
+         [Return to Main Menu]
+
+════════════════════════════════════════════════════════════════════
+SECTION 7: CHARACTER CLASSES
+════════════════════════════════════════════════════════════════════
+
+  WARRIOR
+    Starting Stats: HP=40, ATK=6, DEF=4
+    Passive: Iron Will — below 25% HP, gain +4 DEF
+    Starting Gear: Iron Sword, Leather Armor, 1x Health Potion
+
+  ROGUE
+    Starting Stats: HP=25, ATK=9, DEF=2
+    Passive: Backstab — first hit on any enemy deals 3x damage
+    Starting Gear: Rusty Sword, 2x Bomb, 2x Health Potion
+
+  MAGE
+    Starting Stats: HP=20, ATK=5, DEF=1
+    Passive: Arcane Surge — Scrolls deal 1.5x damage
+    Starting Gear: Scroll of Fire x2, Mega Potion x1, +5 bonus XP/kill
+
+════════════════════════════════════════════════════════════════════
+SECTION 8: SCORING SYSTEM
+════════════════════════════════════════════════════════════════════
+
+  Final score is calculated on death or victory:
+
+  Score = (Floors Reached * 100)
+        + (Enemies Killed * 10)
+        + (Gold Collected * 2)
+        + (Shards Found * 200)
+        + (Turns Survived)
+        + (Victory Bonus: 5000 if completed)
+
+  Score is saved to local leaderboard (SQLite: scores.db).
+  Top 10 scores displayed on main menu leaderboard screen.
+  Leaderboard columns: Rank | Name | Score | Class | Floors | Date
+
+════════════════════════════════════════════════════════════════════
+SECTION 9: TECHNICAL IMPLEMENTATION NOTES
+════════════════════════════════════════════════════════════════════
+
+  FILE STRUCTURE:
+    /crypts_of_the_forgotten_descent/
+    ├── main.py              ← Entry point
+    ├── game.py              ← Main game loop
+    ├── dungeon.py           ← BSP map generation
+    ├── entities/
+    │   ├── player.py        ← Player class + stats
+    │   ├── enemy.py         ← Enemy base class + FSM AI
+    │   └── boss.py          ← Hollow Warden boss logic
+    ├── systems/
+    │   ├── combat.py        ← Damage formulas + status effects
+    │   ├── fov.py           ← Field of view (raycasting)
+    │   ├── inventory.py     ← Item management
+    │   └── score.py         ← Score calculation + SQLite leaderboard
+    ├── ui/
+    │   ├── renderer.py      ← pygame draw calls
+    │   ├── hud.py           ← HP bar, stats, minimap
+    │   └── menus.py         ← Main menu, death screen, victory
+    ├── data/
+    │   ├── items.json       ← Item definitions
+    │   ├── enemies.json     ← Enemy stat tables
+    │   └── scores.db        ← SQLite leaderboard (auto-created)
+    └── assets/
+        ├── tiles/           ← 16x16 tile sprites
+        ├── entities/        ← Sprite sheets
+        └── sounds/          ← SFX and ambient audio
+
+  KEY LIBRARIES:
+    pygame   2.x  → Rendering, input, audio
+    sqlite3        → Built-in Python, leaderboard storage
+    json           → Item/enemy data loading
+    random         → Seeded RNG for reproducible floors
+    collections    → deque for BFS pathfinding
+    dataclasses    → Clean entity stat definitions
+
+════════════════════════════════════════════════════════════════════

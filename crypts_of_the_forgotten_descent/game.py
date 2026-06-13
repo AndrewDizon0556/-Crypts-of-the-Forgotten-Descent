@@ -263,6 +263,9 @@ class Game:
         p      = self.player
         result = player_attack(p, target)
 
+        # Visual effects
+        self.renderer.emit_damage_dealt(target, result["damage"], crit=result["is_crit"])
+
         msg = f"You hit {target.name} for {result['damage']}"
         if result["is_crit"]:
             msg += " (CRIT!)"
@@ -281,6 +284,7 @@ class Game:
                 self.hud.add_message(
                     f"LEVEL UP! LVL {p.level}  +10 HP  +2 ATK  +1 DEF", GOLD
                 )
+                self.renderer.emit_level_up(p)
             # Rogue: backstab resets for the next enemy
             if p.character_class == "rogue":
                 p.backstab_ready = True
@@ -294,6 +298,7 @@ class Game:
             self.dungeon.items.remove(item)
             self.session_stats["shards_found"] += 1
             self.hud.add_message(f"Shard of Ethos obtained! ({self.session_stats['shards_found']}/7)", (80, 220, 220))
+            self.renderer.emit_pickup(item, p.x, p.y)
             return
 
         if item.item_type in ("weapon", "armor"):
@@ -465,7 +470,8 @@ class Game:
         from ui.inventory_ui import InventoryUI
         from ui.shrine_ui import ShrineUI
         from ui.minimap import Minimap
-        self.renderer  = Renderer(self.screen)
+        self.renderer  = Renderer(self.screen, character_class=character_class)
+        self.renderer.set_character_class(character_class)
         self.hud       = HUD(self.screen)
         self.inv_ui    = InventoryUI(self.screen)
         self.shrine_ui = ShrineUI(self.screen)
@@ -543,7 +549,8 @@ class Game:
         self.player = p
 
         # Re-init UI
-        self.renderer  = Renderer(self.screen)
+        self.renderer  = Renderer(self.screen, character_class=cls)
+        self.renderer.set_character_class(cls)
         self.hud       = HUD(self.screen)
         self.inv_ui    = InventoryUI(self.screen)
         self.shrine_ui = ShrineUI(self.screen)
@@ -938,6 +945,7 @@ class Game:
                     self.hud.add_message(
                         f"THE WARDEN SLAMS — {splash} extra AoE damage!", (220, 60, 60)
                     )
+                    self.renderer.emit_boss_slam(self.player)
                 attacked = True
                 break  # one attack per turn regardless of move_speed
 
@@ -953,6 +961,7 @@ class Game:
         if special and special != "AOE_SLAM":
             msg += f"  [{special}]"
         self.hud.add_message(msg + ".", (220, 100, 100))
+        self.renderer.emit_damage_taken(self.player, result["damage"])
 
     def _spawn_boss_summon(self, boss, occupied: set) -> None:
         from entities.enemy import create_enemy

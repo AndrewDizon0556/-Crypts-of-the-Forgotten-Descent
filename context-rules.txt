@@ -1,0 +1,164 @@
+╔══════════════════════════════════════════════════════════════════╗
+║           CRYPTS OF THE FORGOTTEN DESCENT                       ║
+║                  — CONTEXT & RULES —                            ║
+╚══════════════════════════════════════════════════════════════════╝
+
+GAME TITLE:
+  Crypts of the Forgotten Descent
+
+GENRE:
+  Roguelike Dungeon Crawler (Turn-Based, Procedural, Permadeath)
+
+LORE & SETTING:
+  Deep beneath the ruins of the ancient city of Valdris lies a
+  labyrinthine network of crypts — carved not by human hands, but
+  by something far older. You are a Descender: a relic-hunter hired
+  to recover the Shards of Ethos, seven cursed artifacts sealed
+  in the deepest vault. No one who has entered has ever returned.
+  You intend to be the first.
+
+  Each floor you descend warps reality further. The deeper you go,
+  the more the dungeon *remembers* you — and the harder it fights
+  back.
+
+════════════════════════════════════════════════════════════════════
+CORE RULES
+════════════════════════════════════════════════════════════════════
+
+[1] TURN SYSTEM
+  - The game is strictly turn-based.
+  - Each player action (move, attack, use item, wait) consumes 1 turn.
+  - After each player turn, ALL living enemies take their turn.
+  - Waiting (pressing SPACE) passes the turn and regenerates 1 HP.
+
+[2] MOVEMENT
+  - Player moves on a tile-based grid (1 tile per turn).
+  - Movement directions: Up, Down, Left, Right (arrow keys or WASD).
+  - Diagonal movement is NOT allowed.
+  - Moving into an enemy tile initiates a melee attack automatically.
+  - Moving into a wall tile does nothing (no turn consumed).
+
+[3] COMBAT
+  - Combat is automatic when the player walks into an enemy.
+  - Damage Formula:  DMG = max(1, ATK - ENEMY_DEF + random(-1, 2))
+  - Critical Hit: 10% chance to deal 2x damage.
+  - Enemy attacks back immediately after the player's strike.
+  - If HP reaches 0, the entity dies.
+
+[4] PLAYER STATS
+  - HP   : Hit Points. Reach 0 = death (permadeath applies).
+  - ATK  : Attack power. Affects damage dealt.
+  - DEF  : Defense. Reduces incoming damage.
+  - LVL  : Player level. Increases with XP.
+  - XP   : Experience Points. Gained by killing enemies.
+  - GOLD : Currency. Used at shrine shops on certain floors.
+
+[5] LEVELING UP
+  - XP thresholds: Level N requires (N * 50) XP to reach.
+  - On level up:
+      → +10 Max HP (and restore 10 HP)
+      → +2 ATK
+      → +1 DEF
+  - Maximum player level: 20.
+
+[6] PERMADEATH
+  - Death is permanent. The save file is deleted on death.
+  - A new run generates a completely new dungeon seed.
+  - Death screen shows: floors reached, enemies killed, gold found.
+
+[7] DUNGEON FLOORS
+  - The dungeon has 10 floors minimum (endless mode after floor 10).
+  - Each floor is procedurally generated with a unique seed.
+  - Floor difficulty scales every 2 floors:
+      Floors 1-2  : Easy   (weak enemies, many items)
+      Floors 3-4  : Normal (balanced)
+      Floors 5-6  : Hard   (elite enemies appear)
+      Floors 7-8  : Brutal (boss minions patrol)
+      Floors 9-10 : Inferno (final boss floor at 10)
+
+[8] FIELD OF VIEW (FOV)
+  - Player can only see tiles within a radius of 6 tiles.
+  - Explored tiles outside FOV appear as dim memory (dark gray).
+  - Unexplored tiles remain completely hidden (black).
+  - Enemies outside FOV do NOT take their turn (frozen until seen).
+
+[9] WIN CONDITION
+  - Reach Floor 10, defeat the Final Boss: The Hollow Warden.
+  - Collect all 7 Shards of Ethos scattered across floors 4–10.
+  - Escape via the Ascension Portal that opens after the boss dies.
+
+[10] LOSE CONDITION
+  - Player HP reaches 0 at any point.
+  - No revives, no checkpoints, no second chances.
+
+════════════════════════════════════════════════════════════════════
+ENTITIES
+════════════════════════════════════════════════════════════════════
+
+  PLAYER
+    Symbol : @
+    Starts : HP=30, ATK=5, DEF=2, LVL=1, XP=0, GOLD=0
+
+  ENEMIES (Base Stats — scale with floor depth)
+    Skeleton  [S]  HP=8,  ATK=4,  DEF=1  XP=10  GOLD=2
+    Ghoul     [G]  HP=14, ATK=6,  DEF=2  XP=20  GOLD=5
+    Wraith    [W]  HP=10, ATK=8,  DEF=0  XP=25  GOLD=4  (ignores DEF)
+    Stone Golem[O] HP=30, ATK=7,  DEF=6  XP=50  GOLD=12
+    Lich      [L]  HP=20, ATK=10, DEF=3  XP=60  GOLD=15 (floor 7+)
+    Hollow Warden[B] BOSS — See additional-rules-and-flow.txt
+
+════════════════════════════════════════════════════════════════════
+ITEMS
+════════════════════════════════════════════════════════════════════
+
+  CONSUMABLES (single use, picked up automatically)
+    Health Potion  [!]  → Restore 15 HP
+    Mega Potion    [!!] → Restore 35 HP
+    Bomb           [*]  → Deal 20 DMG to all adjacent enemies
+    Scroll of Fire [~]  → Deal 12 DMG to all enemies on screen
+    Antidote       [+]  → Cure Poison status
+
+  EQUIPMENT (equip automatically on pickup, replacing old gear)
+    Rusty Sword    [/]  ATK +2
+    Iron Sword     [/]  ATK +4
+    Shadow Blade   [/]  ATK +7, 15% lifesteal
+    Leather Armor  [[]  DEF +2
+    Chain Mail     [[]  DEF +4
+    Obsidian Plate [[]  DEF +7, -1 ATK penalty
+
+  SPECIAL
+    Shard of Ethos [$]  → Quest item. Collect all 7 to unlock ending.
+    Dungeon Key    [k]  → Opens locked rooms on the same floor.
+
+════════════════════════════════════════════════════════════════════
+STATUS EFFECTS
+════════════════════════════════════════════════════════════════════
+
+  POISON   : Lose 2 HP per turn for 5 turns. Cure with Antidote.
+  SLOW     : Move/attack every other turn for 3 turns.
+  BLEED    : Lose 1 HP per turn for 8 turns. Cured by any heal.
+  CURSED   : ATK and DEF halved for 4 turns (from Lich enemies).
+
+════════════════════════════════════════════════════════════════════
+CONTROLS (Default)
+════════════════════════════════════════════════════════════════════
+
+  WASD / Arrow Keys  : Move player
+  SPACE              : Wait (skip turn, regen 1 HP)
+  I                  : Open inventory
+  E                  : Use/equip highlighted item
+  M                  : Toggle minimap
+  ESC                : Pause menu
+  Q (in pause)       : Quit and save progress
+
+════════════════════════════════════════════════════════════════════
+DEVELOPER NOTES
+════════════════════════════════════════════════════════════════════
+
+  Engine     : Python 3.10+ with pygame 2.x
+  Map Size   : 60x40 tiles per floor
+  Tile Size  : 16x16 pixels (scaled 2x on render)
+  Save Format: JSON (single slot, auto-save per floor)
+  RNG Seed   : Unix timestamp at run start (displayed on death screen)
+
+════════════════════════════════════════════════════════════════════
