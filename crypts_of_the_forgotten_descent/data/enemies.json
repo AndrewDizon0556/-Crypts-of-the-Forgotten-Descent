@@ -1,0 +1,67 @@
+{
+  "skeleton": {
+    "name": "Skeleton",
+    "symbol": "S",
+    "hp": 8,
+    "atk": 4,
+    "def": 1,
+    "xp": 10,
+    "gold": 2,
+    "detection_range": 5,
+    "color": [200, 200, 200],
+    "special": null,
+    "min_floor": 1
+  },
+  "ghoul": {
+    "name": "Ghoul",
+    "symbol": "G",
+    "hp": 14,
+    "atk": 6,
+    "def": 2,
+    "xp": 20,
+    "gold": 5,
+    "detection_range": 6,
+    "color": [80, 180, 80],
+    "special": "bleed",
+    "min_floor": 2
+  },
+  "wraith": {
+    "name": "Wraith",
+    "symbol": "W",
+    "hp": 10,
+    "atk": 8,
+    "def": 0,
+    "xp": 25,
+    "gold": 4,
+    "detection_range": 8,
+    "color": [160, 80, 220],
+    "special": "phase",
+    "min_floor": 3
+  },
+  "stone_golem": {
+    "name": "Stone Golem",
+    "symbol": "O",
+    "hp": 30,
+    "atk": 7,
+    "def": 6,
+    "xp": 50,
+    "gold": 12,
+    "detection_range": 4,
+    "color": [140, 120, 100],
+    "special": "stun",
+    "min_floor": 4
+  },
+  "lich": {
+    "name": "Lich",
+    "symbol": "L",
+    "hp": 20,
+    "atk": 10,
+    "def": 3,
+    "xp": 60,
+    "gold": 15,
+    "detection_range": 7,
+    "color": [200, 60, 200],
+    "special": "curse",
+    "min_floor": 7
+  }
+}
