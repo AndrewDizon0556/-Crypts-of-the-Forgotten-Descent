@@ -164,6 +164,236 @@ def _make_placeholder_spriteset(color: tuple, symbol: str = "") -> SpriteSet:
     return SpriteSet(idle=AnimStrip([frame], fps=4))
 
 
+# ── Humanoid player sprites (64×64, scaled to 32px at render time) ────
+
+def _make_humanoid_player_spriteset(character_class: str) -> SpriteSet:
+    idle_frames = [_draw_humanoid_frame(character_class, i) for i in range(4)]
+    walk_frames = [_draw_humanoid_frame(character_class, i, walk=True) for i in range(4)]
+    return SpriteSet(
+        idle=AnimStrip(idle_frames, fps=4),
+        walk=AnimStrip(walk_frames, fps=6),
+    )
+
+
+def _draw_humanoid_frame(cls: str, frame: int, walk: bool = False) -> pygame.Surface:
+    W, H = 64, 64
+    surf = pygame.Surface((W, H), pygame.SRCALPHA)
+    bob = (0, -2, 0, 2)[frame % 4] if walk else (0, -1, 0, 1)[frame % 4]
+    {"warrior": _paint_warrior, "rogue": _paint_rogue, "mage": _paint_mage}.get(
+        cls, _paint_warrior)(surf, W, H, bob)
+    return surf
+
+
+def _paint_warrior(surf: pygame.Surface, W: int, H: int, b: int) -> None:
+    S   = (205,168,128); SSH = (170,130, 95)
+    ST  = (118,112,138); SLT = (162,157,182); SDK = (78, 74, 98)
+    GLD = (178,148, 58)
+    CPE = (138, 22, 22); CPD = ( 88, 14, 14)
+    LTH = ( 68, 48, 28); LTL = ( 95, 68, 42)
+    BLD = (212,216,232); BHL = (245,248,255)
+
+    ag = pygame.Surface((W, H), pygame.SRCALPHA)
+    pygame.draw.ellipse(ag, (200,160,80,22), (10,22+b,44,36))
+    surf.blit(ag, (0,0))
+
+    # Cape behind body
+    cp = [(22,20+b),(15,58+b),(21,63+b),(32,57+b),(43,63+b),(49,58+b),(42,20+b)]
+    pygame.draw.polygon(surf, CPE, cp); pygame.draw.polygon(surf, CPD, cp, 1)
+
+    # Sword: blade, crossguard, handle, pommel
+    pygame.draw.rect(surf, BLD, (53, 6+b, 4,36))
+    pygame.draw.line(surf, BHL, (54, 6+b),(54,40+b), 1)
+    pygame.draw.line(surf, SDK, (56, 6+b),(56,40+b), 1)
+    pygame.draw.rect(surf, GLD, (47,40+b,16, 5))
+    pygame.draw.rect(surf,(210,185,90),(48,41+b,14, 2))
+    pygame.draw.rect(surf, LTH, (53,45+b, 4,12))
+    pygame.draw.circle(surf, GLD, (55,58+b), 4)
+    pygame.draw.circle(surf,(210,185,90),(55,57+b), 2)
+
+    # Shield
+    sh = [(7,24+b),(7,46+b),(15,52+b),(15,22+b)]
+    pygame.draw.polygon(surf,(145,108,48), sh)
+    pygame.draw.polygon(surf,( 95, 70,28), sh, 1)
+    pygame.draw.circle(surf, GLD,(11,37+b), 6)
+    pygame.draw.circle(surf,(210,185,90),(10,36+b), 3)
+
+    # Legs + boots
+    for lx in (18, 35):
+        pygame.draw.rect(surf, ST, (lx,43+b,11,17))
+        pygame.draw.rect(surf, SLT,(lx+1,44+b,5,8))
+    pygame.draw.rect(surf, LTH,(16,57+b,14,6)); pygame.draw.rect(surf, LTL,(17,57+b,5,2))
+    pygame.draw.rect(surf, LTH,(34,57+b,14,6)); pygame.draw.rect(surf, LTL,(35,57+b,5,2))
+
+    # Chest plate + belt
+    pygame.draw.rect(surf, ST, (19,22+b,26,22))
+    pygame.draw.rect(surf, SLT,(21,23+b,11, 6))
+    pygame.draw.rect(surf, SDK,(19,22+b,26,22), 1)
+    pygame.draw.rect(surf, LTH,(17,40+b,30, 5))
+    pygame.draw.rect(surf, GLD,(17,40+b,30, 2))
+    pygame.draw.rect(surf, GLD,(28,40+b, 8, 5))
+    pygame.draw.rect(surf,(210,185,90),(29,41+b, 6, 3))
+
+    # Arms + pauldrons
+    pygame.draw.rect(surf, ST, (10,22+b,10,10)); pygame.draw.rect(surf, ST,(10,32+b, 9, 9))
+    pygame.draw.rect(surf, SLT,(11,23+b, 4, 5))
+    pygame.draw.rect(surf, ST, (44,22+b,10,10)); pygame.draw.rect(surf, ST,(45,32+b, 9,12))
+    pygame.draw.rect(surf, SLT,(45,23+b, 4, 5))
+
+    # Neck
+    pygame.draw.rect(surf, S,(28,17+b,8,6))
+
+    # Face
+    pygame.draw.ellipse(surf, S,  (22, 4+b,20,18))
+    pygame.draw.ellipse(surf, SSH,(22,13+b,20, 9))
+    pygame.draw.ellipse(surf,(45,35,25),(26, 9+b,5,4))
+    pygame.draw.ellipse(surf,(45,35,25),(33, 9+b,5,4))
+    pygame.draw.circle(surf,(220,195,175),(27, 9+b), 1)
+    pygame.draw.circle(surf,(220,195,175),(34, 9+b), 1)
+    pygame.draw.line(surf, SSH,(28,16+b),(36,16+b), 1)
+
+    # Helmet: crown, cheek guards, nose guard, red plume
+    pygame.draw.rect(surf, ST, (20, 2+b,24,10))
+    pygame.draw.rect(surf, ST, (17, 8+b, 8, 9))
+    pygame.draw.rect(surf, ST, (39, 8+b, 8, 9))
+    pygame.draw.rect(surf, SDK,(28, 7+b, 8,10))
+    pygame.draw.rect(surf, SLT,(21, 3+b, 9, 3))
+    pygame.draw.rect(surf, CPE,(29, 0+b, 6, 4))
+
+
+def _paint_rogue(surf: pygame.Surface, W: int, H: int, b: int) -> None:
+    S   = (175,140,108); SSH = (140,108, 78)
+    HOD = ( 28, 35, 28); HDL = ( 42, 55, 40)
+    LTH = ( 55, 38, 18); LTL = ( 80, 58, 32)
+    BLD = (205,214,225); BHL = (240,248,255)
+    CLT = ( 38, 48, 38); CLL = ( 55, 70, 52)
+    RPE = ( 90, 72, 42); EGL = ( 80,210, 80)
+
+    ag = pygame.Surface((W,H), pygame.SRCALPHA)
+    pygame.draw.ellipse(ag,(20,80,20,18),(8,20+b,48,40))
+    surf.blit(ag,(0,0))
+
+    # Cloak behind body
+    ck = [(20,20+b),(12,60+b),(20,64+b),(32,58+b),(44,64+b),(52,60+b),(44,20+b)]
+    pygame.draw.polygon(surf, HOD, ck); pygame.draw.polygon(surf, HDL, ck, 1)
+
+    # Legs + dark boots
+    pygame.draw.rect(surf, LTH,(19,43+b,10,17)); pygame.draw.rect(surf, LTL,(20,44+b,4,7))
+    pygame.draw.rect(surf, HOD,(17,57+b,14,6))
+    pygame.draw.rect(surf, LTH,(35,43+b,10,17)); pygame.draw.rect(surf, LTL,(36,44+b,4,7))
+    pygame.draw.rect(surf, HOD,(34,57+b,14,6))
+
+    # Left dagger (pointing down/forward)
+    pygame.draw.line(surf, BLD,(14,38+b),(22,52+b), 2)
+    pygame.draw.line(surf, BHL,(15,38+b),(23,52+b), 1)
+    pygame.draw.rect(surf, RPE,(12,36+b,6,3)); pygame.draw.rect(surf, BLD,(10,38+b,8,2))
+
+    # Right dagger (raised)
+    pygame.draw.line(surf, BLD,(50,28+b),(42,44+b), 2)
+    pygame.draw.line(surf, BHL,(51,28+b),(43,44+b), 1)
+    pygame.draw.rect(surf, RPE,(46,42+b,6,3)); pygame.draw.rect(surf, BLD,(44,42+b,8,2))
+
+    # Torso leather + belt pouches
+    pygame.draw.rect(surf, LTH,(19,22+b,26,22)); pygame.draw.rect(surf, LTL,(21,23+b,10,6))
+    pygame.draw.rect(surf, HOD,(19,22+b,26,22), 1)
+    pygame.draw.rect(surf, RPE,(17,40+b,30,4))
+    pygame.draw.rect(surf, LTH,(22,38+b,6,8)); pygame.draw.rect(surf, LTL,(23,39+b,4,2))
+    pygame.draw.rect(surf, LTH,(36,38+b,6,8)); pygame.draw.rect(surf, LTL,(37,39+b,4,2))
+
+    # Arms in dark cloth
+    pygame.draw.rect(surf, CLT,( 9,22+b,11,20)); pygame.draw.rect(surf, CLL,(10,23+b,4,5))
+    pygame.draw.rect(surf, CLT,(44,22+b,11,20)); pygame.draw.rect(surf, CLL,(45,23+b,4,5))
+
+    # Neck
+    pygame.draw.rect(surf, S,(28,17+b,8,5))
+
+    # Face (drawn before hood, then re-exposed inside it)
+    pygame.draw.ellipse(surf, S,  (23, 6+b,18,15))
+    pygame.draw.ellipse(surf, SSH,(23,13+b,18, 7))
+
+    # Hood shadow + fabric
+    pygame.draw.ellipse(surf,(15,20,15),(21, 3+b,22,16))
+    pygame.draw.ellipse(surf, HOD,(18, 0+b,28,18))
+    pygame.draw.ellipse(surf, HDL,(19, 1+b,26,16), 1)
+
+    # Face visible inside hood opening
+    pygame.draw.ellipse(surf, S,  (23, 6+b,18,13))
+    pygame.draw.ellipse(surf, SSH,(23,13+b,18, 6))
+    pygame.draw.ellipse(surf,(20,20,20),(26, 9+b,5,3))
+    pygame.draw.ellipse(surf,(20,20,20),(33, 9+b,5,3))
+    pygame.draw.ellipse(surf, EGL,(27, 9+b,3,2))
+    pygame.draw.ellipse(surf, EGL,(34, 9+b,3,2))
+    pygame.draw.line(surf, SSH,(28,15+b),(34,15+b), 1)
+    pygame.draw.ellipse(surf, HOD,(18, 1+b,28,18), 2)
+
+
+def _paint_mage(surf: pygame.Surface, W: int, H: int, b: int) -> None:
+    S   = (188,158,138); SSH = (155,122,100)
+    ROB = ( 42, 28, 72); RLT = ( 72, 50,112)
+    TRM = (182,142,222); TRL = (210,180,255)
+    WOD = ( 90, 60, 24); WLT = (118, 84, 40)
+    ORB = (115, 75,215); OLT = (160,120,255)
+    RUN = (140,100,240); EY  = ( 80,130,240)
+
+    ag = pygame.Surface((W,H), pygame.SRCALPHA)
+    pygame.draw.ellipse(ag,(100,60,200,20),(8,18+b,48,44))
+    surf.blit(ag,(0,0))
+
+    # Staff with glowing orb
+    pygame.draw.rect(surf, WOD,(10, 4+b,5,54)); pygame.draw.rect(surf, WLT,(11, 4+b,2,54))
+    pygame.draw.circle(surf, ORB,(12, 5+b), 7)
+    pygame.draw.circle(surf, OLT,(11, 4+b), 4)
+    pygame.draw.circle(surf,(220,200,255),(10, 3+b), 2)
+    og = pygame.Surface((W,H), pygame.SRCALPHA)
+    pygame.draw.circle(og,(120,80,220,40),(12, 5+b),12)
+    surf.blit(og,(0,0))
+
+    # Robe hem (tapered skirt)
+    pygame.draw.polygon(surf, ROB,[(18,42+b),(14,63+b),(50,63+b),(46,42+b)])
+    pygame.draw.polygon(surf, RLT,[(18,42+b),(14,63+b),(50,63+b),(46,42+b)], 1)
+    pygame.draw.line(surf, TRM,(14,60+b),(50,60+b), 2)
+    pygame.draw.rect(surf,(32,24,48),(18,60+b,12,4))
+    pygame.draw.rect(surf,(32,24,48),(34,60+b,12,4))
+
+    # Torso robe + arcane rune on chest
+    pygame.draw.rect(surf, ROB,(18,22+b,28,22)); pygame.draw.rect(surf, RLT,(20,23+b,12,7))
+    pygame.draw.rect(surf, TRM,(18,22+b,28,22), 1)
+    cx, cy = 32, 30+b
+    pygame.draw.circle(surf, RUN,(cx,cy),5,1)
+    pygame.draw.line(surf, RUN,(cx-5,cy),(cx+5,cy),1)
+    pygame.draw.line(surf, RUN,(cx,cy-5),(cx,cy+5),1)
+    pygame.draw.rect(surf, TRM,(18,40+b,28,4)); pygame.draw.rect(surf, TRL,(20,40+b,8,2))
+
+    # Arms — left holds staff, right in casting gesture
+    pygame.draw.rect(surf, ROB,( 8,22+b,12,20)); pygame.draw.rect(surf, RLT,( 9,23+b,5,5))
+    pygame.draw.rect(surf, TRM,( 8,22+b,12,20), 1)
+    pygame.draw.rect(surf, ROB,(44,22+b,12,18)); pygame.draw.rect(surf, RLT,(45,23+b,5,5))
+    pygame.draw.rect(surf, TRM,(44,22+b,12,18), 1)
+    pygame.draw.circle(surf, OLT,(52,42+b),4)
+    pygame.draw.circle(surf,(220,200,255),(52,42+b),2)
+
+    # Neck
+    pygame.draw.rect(surf, S,(28,17+b,8,6))
+
+    # Face
+    pygame.draw.ellipse(surf, S,  (22, 5+b,20,16))
+    pygame.draw.ellipse(surf, SSH,(22,13+b,20, 7))
+    pygame.draw.ellipse(surf,(30,30,50),(25,10+b,6,4))
+    pygame.draw.ellipse(surf,(30,30,50),(33,10+b,6,4))
+    pygame.draw.ellipse(surf, EY,(26,10+b,4,3))
+    pygame.draw.ellipse(surf, EY,(34,10+b,4,3))
+    pygame.draw.circle(surf,(200,220,255),(27,10+b),1)
+    pygame.draw.circle(surf,(200,220,255),(35,10+b),1)
+    pygame.draw.ellipse(surf, SSH,(26,16+b,12,5))
+
+    # Pointed hat: brim, cone, band, rune star
+    pygame.draw.ellipse(surf, ROB,(14,14+b,36,8))
+    pygame.draw.ellipse(surf, TRM,(14,14+b,36,8), 1)
+    hat = [(32,-1+b),(18,16+b),(46,16+b)]
+    pygame.draw.polygon(surf, ROB, hat); pygame.draw.polygon(surf, RLT, hat, 1)
+    pygame.draw.rect(surf, TRM,(20,12+b,24,3))
+    pygame.draw.circle(surf, RUN,(32, 7+b),3,1)
+
+
 def _load_entity_sheet(filename: str, color: tuple,
                        symbol: str = "") -> SpriteSet:
     path  = os.path.join(_SPRITES, filename)
@@ -189,10 +419,12 @@ def _load_entity_sheet(filename: str, color: tuple,
 
 # Public entity sprite loaders
 def load_player(character_class: str) -> SpriteSet:
-    colors = {"warrior": (180, 160, 220), "rogue": (140, 200, 140), "mage": (120, 160, 255)}
-    symbols = {"warrior": "@", "rogue": "@", "mage": "@"}
-    c = colors.get(character_class, (220, 220, 80))
-    return _load_entity_sheet(f"player_{character_class}.png", c, symbols.get(character_class, "@"))
+    path = os.path.join(_SPRITES, f"player_{character_class}.png")
+    if _load_png(path) is not None:
+        colors = {"warrior": (180,160,220), "rogue": (140,200,140), "mage": (120,160,255)}
+        return _load_entity_sheet(f"player_{character_class}.png",
+                                  colors.get(character_class, (220,220,80)), "@")
+    return _make_humanoid_player_spriteset(character_class)
 
 
 def load_enemy(name: str) -> SpriteSet:
