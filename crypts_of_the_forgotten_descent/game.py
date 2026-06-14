@@ -226,7 +226,7 @@ class Game:
             if key_item:
                 self.player.inventory.remove(key_item)
                 self.dungeon.set_tile(nx, ny, _TT.FLOOR)
-                self.hud.add_message("You use the Dungeon Key — the door swings open!", GOLD)
+                self.hud.add_message(f"You use the {key_item.name} — the door swings open!", GOLD)
                 return True   # unlocking costs a turn
             self.hud.add_message("Locked door! You need a Dungeon Key.", (220, 160, 60))
             return False
@@ -319,7 +319,7 @@ class Game:
         elif item.item_type == "key":
             p.add_to_inventory(item)
             self.dungeon.items.remove(item)
-            self.hud.add_message("You found a Dungeon Key.", (220, 200, 60))
+            self.hud.add_message(f"You found the {item.name}.", (220, 200, 60))
 
     # ------------------------------------------------------------------
     # Enemy turns
@@ -630,15 +630,19 @@ class Game:
         # --- Items ---
         item_count = rng.randint(3, floor + 4)
         item_pool  = [
-            "health_potion", "health_potion", "health_potion",
+            "health_potion", "health_potion",
             "mega_potion", "bomb", "scroll_of_fire", "antidote",
         ]
         if floor >= 3:
-            item_pool += ["rusty_sword", "leather_armor"]
+            item_pool += ["rusty_sword", "leather_armor", "health_potion"]
         if floor >= 5:
             item_pool += ["iron_sword", "chain_mail"]
+        if floor >= 6:
+            item_pool += ["grand_elixir", "void_bomb", "inferno_scroll"]
         if floor >= 7:
             item_pool += ["shadow_blade", "obsidian_plate"]
+        if floor >= 9:
+            item_pool += ["soul_reaper", "void_shroud"]
 
         floor_tiles = [
             t for t in dungeon.floor_tiles()
@@ -808,8 +812,9 @@ class Game:
             self._check_conditions()
             self.session_stats["turns_survived"] += 1
         elif result.startswith("BOMB:"):
+            bomb_dmg = int(result.split(":")[1])
             from systems.combat import aoe_bomb_damage
-            hits = aoe_bomb_damage(p, self.dungeon.enemies)
+            hits = aoe_bomb_damage(p, self.dungeon.enemies, bomb_dmg)
             self._resolve_aoe_kills(hits)
             self.hud.add_message(
                 f"BOOM! {sum(h['damage'] for h in hits)} dmg to {len(hits)} targets.",

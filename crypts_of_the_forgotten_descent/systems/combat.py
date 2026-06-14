@@ -76,13 +76,13 @@ def apply_status_damage(entity: Entity) -> int:
     return total
 
 
-def aoe_bomb_damage(player, enemies: list[Enemy]) -> list[dict]:
-    """Deal 20 damage to all enemies adjacent to the player."""
+def aoe_bomb_damage(player, enemies: list[Enemy], damage: int = 25) -> list[dict]:
+    """Deal damage to all enemies adjacent to the player."""
     results = []
     for e in enemies:
         if abs(e.x - player.x) <= 1 and abs(e.y - player.y) <= 1 and e.alive:
-            e.take_damage(20)
-            results.append({"enemy": e, "damage": 20, "killed": not e.alive})
+            e.take_damage(damage)
+            results.append({"enemy": e, "damage": damage, "killed": not e.alive})
     return results
 
 

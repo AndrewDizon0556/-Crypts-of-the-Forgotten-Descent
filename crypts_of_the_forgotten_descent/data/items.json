@@ -1,100 +1,143 @@
 {
   "health_potion": {
-    "name": "Health Potion",
+    "name": "Vial of Crimson Essence",
     "symbol": "!",
     "type": "consumable",
     "effect": "heal",
-    "value": 15,
-    "color": [200, 60, 60]
+    "value": 20,
+    "color": [210, 45, 65]
   },
   "mega_potion": {
-    "name": "Mega Potion",
+    "name": "Elixir of Restoration",
     "symbol": "!",
     "type": "consumable",
     "effect": "heal",
-    "value": 35,
-    "color": [220, 40, 40]
+    "value": 45,
+    "color": [180, 35, 110]
+  },
+  "grand_elixir": {
+    "name": "Draught of the Ancients",
+    "symbol": "!",
+    "type": "consumable",
+    "effect": "heal",
+    "value": 75,
+    "color": [190, 150, 35]
   },
   "bomb": {
-    "name": "Bomb",
+    "name": "Crypt Grenade",
     "symbol": "*",
     "type": "consumable",
     "effect": "bomb",
-    "value": 20,
-    "color": [200, 120, 40]
+    "value": 25,
+    "color": [205, 85, 25]
+  },
+  "void_bomb": {
+    "name": "Voidfire Flask",
+    "symbol": "*",
+    "type": "consumable",
+    "effect": "bomb",
+    "value": 45,
+    "color": [150, 35, 115]
   },
   "scroll_of_fire": {
-    "name": "Scroll of Fire",
+    "name": "Ember Scroll",
     "symbol": "~",
     "type": "consumable",
     "effect": "fire_damage",
-    "value": 12,
-    "color": [220, 180, 60]
+    "value": 18,
+    "color": [220, 155, 45]
+  },
+  "inferno_scroll": {
+    "name": "Scroll of Eternal Flame",
+    "symbol": "~",
+    "type": "consumable",
+    "effect": "fire_damage",
+    "value": 35,
+    "color": [230, 90, 15]
   },
   "antidote": {
-    "name": "Antidote",
+    "name": "Purifying Draught",
     "symbol": "+",
     "type": "consumable",
     "effect": "cure_poison",
     "value": 0,
-    "color": [80, 200, 120]
+    "color": [55, 185, 95]
   },
   "rusty_sword": {
-    "name": "Rusty Sword",
+    "name": "Gravekeeper's Fang",
     "symbol": "/",
     "type": "weapon",
-    "atk_bonus": 2,
+    "atk_bonus": 3,
     "def_bonus": 0,
     "atk_penalty": 0,
     "lifesteal": 0.0,
-    "color": [160, 140, 120]
+    "color": [185, 170, 145]
   },
   "iron_sword": {
-    "name": "Iron Sword",
+    "name": "Crypt Warden's Blade",
     "symbol": "/",
     "type": "weapon",
-    "atk_bonus": 4,
+    "atk_bonus": 6,
     "def_bonus": 0,
     "atk_penalty": 0,
     "lifesteal": 0.0,
-    "color": [160, 160, 200]
+    "color": [135, 155, 200]
   },
   "shadow_blade": {
-    "name": "Shadow Blade",
+    "name": "Shadowfang",
     "symbol": "/",
     "type": "weapon",
-    "atk_bonus": 7,
+    "atk_bonus": 10,
     "def_bonus": 0,
     "atk_penalty": 0,
-    "lifesteal": 0.15,
-    "color": [80, 60, 160]
+    "lifesteal": 0.18,
+    "color": [100, 55, 210]
+  },
+  "soul_reaper": {
+    "name": "Soul Reaper",
+    "symbol": "/",
+    "type": "weapon",
+    "atk_bonus": 14,
+    "def_bonus": 0,
+    "atk_penalty": 0,
+    "lifesteal": 0.25,
+    "color": [165, 20, 55]
   },
   "leather_armor": {
-    "name": "Leather Armor",
+    "name": "Watchman's Leather Vest",
     "symbol": "[",
     "type": "armor",
     "atk_bonus": 0,
-    "def_bonus": 2,
+    "def_bonus": 3,
     "atk_penalty": 0,
-    "color": [140, 100, 60]
+    "color": [145, 100, 55]
   },
   "chain_mail": {
-    "name": "Chain Mail",
+    "name": "Iron Pact Chainmail",
     "symbol": "[",
     "type": "armor",
     "atk_bonus": 0,
-    "def_bonus": 4,
+    "def_bonus": 6,
     "atk_penalty": 0,
-    "color": [120, 140, 160]
+    "color": [130, 150, 170]
   },
   "obsidian_plate": {
-    "name": "Obsidian Plate",
+    "name": "Obsidian Warplate",
     "symbol": "[",
     "type": "armor",
     "atk_bonus": 0,
-    "def_bonus": 7,
+    "def_bonus": 10,
     "atk_penalty": -1,
-    "color": [60, 50, 80]
+    "color": [48, 38, 78]
+  },
+  "void_shroud": {
+    "name": "Shroud of the Abyss",
+    "symbol": "[",
+    "type": "armor",
+    "atk_bonus": 0,
+    "def_bonus": 14,
+    "atk_penalty": -2,
+    "color": [25, 15, 65]
   },
   "shard_of_ethos": {
     "name": "Shard of Ethos",
@@ -104,10 +147,10 @@
     "color": [80, 220, 220]
   },
   "dungeon_key": {
-    "name": "Dungeon Key",
+    "name": "Iron Vault Key",
     "symbol": "k",
     "type": "key",
     "is_key": true,
-    "color": [220, 200, 60]
+    "color": [215, 195, 55]
   }
 }
