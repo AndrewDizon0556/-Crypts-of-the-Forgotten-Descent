@@ -1,3 +1,8 @@
+# Game runtime files
+save.json
+crypts_of_the_forgotten_descent/save.json
+crypts_of_the_forgotten_descent/data/scores.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
